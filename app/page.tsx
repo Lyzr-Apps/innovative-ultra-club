@@ -128,16 +128,25 @@ export default function CustomerSupportPage() {
 
       const data = await response.json()
 
-      if (data.success && data.response) {
-        const agentMessage: ChatMessage = {
-          id: `msg-${Date.now()}`,
-          type: 'agent',
-          content: data.response || SAMPLE_AGENT_RESPONSE.response,
-          timestamp: new Date(),
-          status: 'delivered',
+      let responseContent = SAMPLE_AGENT_RESPONSE.response
+
+      if (data.success) {
+        // Extract the response text from the agent response
+        if (typeof data.response === 'string') {
+          responseContent = data.response
+        } else if (data.response?.response && typeof data.response.response === 'string') {
+          responseContent = data.response.response
         }
-        setMessages((prev) => [...prev, agentMessage])
       }
+
+      const agentMessage: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        type: 'agent',
+        content: responseContent,
+        timestamp: new Date(),
+        status: 'delivered',
+      }
+      setMessages((prev) => [...prev, agentMessage])
     } catch (error) {
       console.error('Error calling agent:', error)
       const errorMessage: ChatMessage = {
